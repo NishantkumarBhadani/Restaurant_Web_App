@@ -1,8 +1,34 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../StateManagement/Cart_Management/Features/cartslice";
+import { useNavigate } from "react-router-dom";
 
 function Menu() {
   const [searchedItems, setSearchedItems] = useState("");
-  const [filter,setFilter]=useState('all')
+  const [filter, setFilter] = useState("all");
+  const [showPopup, setShowPopup] = useState(false);
+  const [checkOutButton, setcheckOutButton] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleAddToCart = (item) => {
+    dispatch(addToCart(item)); // Redux me item add karo
+    // navigate("/Cart"); // Cart page par le jao
+    // console.log(item);
+
+    //showing the pop up
+    setShowPopup(true);
+
+    //showing checkOut button
+    setcheckOutButton(true);
+
+    //hide the pop-up after 7 sec
+    setTimeout(() => {
+      setShowPopup(false);
+    }, 5000);
+  };
+
   const dishes = [
     {
       id: 1,
@@ -69,11 +95,13 @@ function Menu() {
   //           return false;
   //         }
   //       });
-  const filterDishes=dishes.filter((dish)=>{
-    const searchMatches=dish.name.toLowerCase().includes(searchedItems.toLowerCase());
-    const filterMatches=filter==="all"|| dish.food===filter;
+  const filterDishes = dishes.filter((dish) => {
+    const searchMatches = dish.name
+      .toLowerCase()
+      .includes(searchedItems.toLowerCase());
+    const filterMatches = filter === "all" || dish.food === filter;
     return searchMatches && filterMatches;
-  })
+  });
 
   const handleSearch = () => {
     searchedItems;
@@ -101,10 +129,7 @@ function Menu() {
             className="w-full p-3  outline-none"
           />
           {/* search icon */}
-          <button
-            onClick={handleSearch}
-            className=" p-1 text-white"
-          >
+          <button onClick={handleSearch} className=" p-1 text-white">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               x="0px"
@@ -119,13 +144,12 @@ function Menu() {
         </div>
         {/* Filter selection */}
         <div className="mb-4 flex justify-between md:justify-center items-center">
-          <span className="font-medium text-gray-700">
-            Filter By:
-          </span>
-          <select 
-          className="border border-gray-300 rounded-md p-2" 
-          value={filter}
-          onChange={(e)=>setFilter(e.target.value)}>
+          <span className="font-medium text-gray-700">Filter By:</span>
+          <select
+            className="border border-gray-300 rounded-md p-2"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          >
             <option value="all">All</option>
             <option value="veg">Veg</option>
             <option value="non-veg">Non-veg</option>
@@ -157,7 +181,10 @@ function Menu() {
                     {dish.price}.00
                   </p>
                 </div>
-                <button className="mt-4 w-full bg-orange-500 text-white py-1 text-xs md:text-[1rem] rounded hover:bg-orange-600">
+                <button
+                  className="mt-4 w-full bg-orange-500 text-white py-1 text-xs md:text-[1rem] rounded hover:bg-orange-600"
+                  onClick={() => handleAddToCart(dish)}
+                >
                   Add to Cart
                 </button>
               </div>
@@ -165,6 +192,27 @@ function Menu() {
           ))}
         </div>
       </section>
+
+      {/* Pop-up Notification */}
+      {showPopup && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg transition-opacity duration-300">
+          Item added to cart! 🛒
+        </div>
+      )}
+
+      {/* show checkout */}
+      {checkOutButton && (
+        <div className="flex items-center justify-end">
+          <div className="p-2 mr-4 bg-green-500 mb-2 rounded-lg text-white font-semibold w-40 text-center transition-transform hover:bg-green-600 scale-105">
+            <button 
+            onClick={()=>{
+              navigate("/Cart")
+            }}
+            className="text-center">Check Out
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
